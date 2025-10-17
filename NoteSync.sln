@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteSync", "NoteSync.csproj", "{B4C36E8F-99A3-A00E-A2C5-31D0EEF1F07A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4C36E8F-99A3-A00E-A2C5-31D0EEF1F07A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C36E8F-99A3-A00E-A2C5-31D0EEF1F07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C36E8F-99A3-A00E-A2C5-31D0EEF1F07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C36E8F-99A3-A00E-A2C5-31D0EEF1F07A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E0E86790-0BC0-438C-A36F-C27B7D783003}
+	EndGlobalSection
+EndGlobal
