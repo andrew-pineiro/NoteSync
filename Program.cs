@@ -12,19 +12,21 @@ public class Program {
         }
         
         var files = Directory.GetFiles(Config.NoteDirectory, $"*{Config.NoteExtension}", SearchOption.AllDirectories);
-
+        string parentId = Config.JiraRootPageID;
         foreach (var file in files)
         {
             string dirChar = Path.DirectorySeparatorChar.ToString();
             string fileName = file.Substring(file.LastIndexOf(dirChar) + 1);
             string category = file.Replace(Config.NoteDirectory, "").Replace(fileName, "").Replace(dirChar, "");
-            string subject = fileName.Replace(Config.NoteExtension!, "");
+            string subject = fileName.Replace(Config.NoteExtension, "");
             string content = File.ReadAllText(file);
 
             if(!string.IsNullOrEmpty(category))
             {
                 jira.CreatePage(Config.JiraRootPageID, category, "", out string id);
-                jira.CreatePage(id, subject, content, out _);
+                if (!string.IsNullOrEmpty(id))
+                    parentId = id;
+                jira.CreatePage(parentId, subject, content, out _);
                 
             } else
             {

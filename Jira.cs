@@ -17,12 +17,11 @@ public class Jira
       JiraModel model = new()
       {
          SpaceId = Config.JiraSpaceID,
-         Status = "current",
          Title = title,
          ParentId = parentId,
          Body = new JiraBody()
          {
-            Representation = "storage",
+            Representation = "wiki",
             Value = content
          },
          Subtype = ""
