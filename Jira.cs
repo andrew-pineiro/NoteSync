@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using System.Text;
 
 namespace NoteSync;
@@ -9,8 +10,9 @@ public class Jira
       var bytes = Encoding.UTF8.GetBytes(secret);
       return Convert.ToBase64String(bytes);
    }
-   public void CreatePage(string parentId, string title, string content)
+   public void CreatePage(string parentId, string title, string content, out string createdId)
    {
+      createdId = string.Empty;
       HttpSender sender = new();
       JiraModel model = new()
       {
@@ -33,7 +35,9 @@ public class Jira
       }
       if(results.IsSuccessStatusCode)
       {
-         Console.WriteLine($"Created page: {title}");      
+         var resultModel = results.Content.ReadFromJsonAsync<PageModel>().Result;
+         createdId = resultModel!.Id!;
+         Console.WriteLine($"Created page: {title} - {createdId}");      
       } else
       {
          Console.WriteLine($"ERROR CREATING PAGE: {results.ReasonPhrase}");

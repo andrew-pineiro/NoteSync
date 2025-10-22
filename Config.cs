@@ -9,6 +9,7 @@ public class Config
     public static string JiraEmail { get; private set; } = string.Empty;
     public static string JiraBaseURL { get; private set; } = string.Empty;
     public static string JiraSpaceID { get; private set; } = string.Empty;
+    public static string JiraRootPageID { get; private set; } = string.Empty;
     public static string NoteDirectory { get; private set; } = string.Empty;
     public static string NoteExtension { get; private set; } = string.Empty;
 
@@ -21,6 +22,8 @@ public class Config
     public required string _jiraBaseURL { private get; set; }
     [JsonPropertyName("JiraSpaceID")]
     public required string _jiraSpaceID { private get; set; }
+    [JsonPropertyName("JiraRootPageID")]
+    public required string _jiraRootPageID { private get; set; }
     [JsonPropertyName("NoteDirectory")]
     public required string _noteDirectory { private get; set; }
     [JsonPropertyName("NoteExtension")]
@@ -42,6 +45,7 @@ public class Config
             JiraBaseURL = results!._jiraBaseURL;
             JiraEmail = results!._jiraEmail;
             JiraSpaceID = results!._jiraSpaceID;
+            JiraRootPageID = results!._jiraRootPageID;
             NoteDirectory = results!._noteDirectory;
             NoteExtension = results!._noteExtension;
             

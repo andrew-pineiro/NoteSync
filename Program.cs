@@ -17,15 +17,19 @@ public class Program {
         {
             string dirChar = Path.DirectorySeparatorChar.ToString();
             string fileName = file.Substring(file.LastIndexOf(dirChar) + 1);
-
-            //TODO: look to use the category as the parent page
             string category = file.Replace(Config.NoteDirectory, "").Replace(fileName, "").Replace(dirChar, "");
-
             string subject = fileName.Replace(Config.NoteExtension!, "");
             string content = File.ReadAllText(file);
-            
-            //TODO: pull parent page id from above category
-            jira.CreatePage("1325105153", subject, content);
+
+            if(!string.IsNullOrEmpty(category))
+            {
+                jira.CreatePage(Config.JiraRootPageID, category, "", out string id);
+                jira.CreatePage(id, subject, content, out _);
+                
+            } else
+            {
+                jira.CreatePage(Config.JiraRootPageID, subject, content, out _);
+            }
         }
         
     }    
