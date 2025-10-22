@@ -57,3 +57,4 @@ nunit-*.xml
 results.*
 secret.txt
 baseurl.txt
+appsettings.json

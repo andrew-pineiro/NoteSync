@@ -1,16 +1,3 @@
-/*
-curl -D- \
-   -u <your_email@domain.com>:<your_user_api_token> \
-   -X GET \
-   -H "Content-Type: application/json" \
-   https://<your-domain.atlassian.net>/wiki/rest/api/space
-curl -D- \
-   -X GET \
-   -H "Authorization: Basic <your_encoded_string>" \
-   -H "Content-Type: application/json" \
-   "https://<your-domain.atlassian.net>/wiki/rest/api/space"
-
-*/
 using System.Text;
 
 namespace NoteSync;
@@ -18,32 +5,39 @@ public class Jira
 {
    public string GetToken()
    {
-      //TODO: setup an appsettings file for secret
-      var secret = File.ReadAllText("secret.txt");
+      var secret = Config.JiraEmail + ":" + Config.JiraSecret;
       var bytes = Encoding.UTF8.GetBytes(secret);
       return Convert.ToBase64String(bytes);
    }
-   public string GetBaseUrl()
+   public void CreatePage(string parentId, string title, string content)
    {
-      //TODO: setup an appsettings file for base url
-      var baseURL = File.ReadAllText("baseurl.txt");
-      return baseURL;
-    }
-   public void GetPages()
-   {
-      string spaceId = "10321920";
       HttpSender sender = new();
-      var results = sender.Send(GetToken(), "GET", "", GetBaseUrl(), $"/wiki/api/v2/pages?space-id={spaceId}");
-      var content = results.Content.ReadAsStringAsync().Result;
-      Console.WriteLine(content);
+      JiraModel model = new()
+      {
+         SpaceId = Config.JiraSpaceID,
+         Status = "current",
+         Title = title,
+         ParentId = parentId,
+         Body = new JiraBody()
+         {
+            Representation = "storage",
+            Value = content
+         },
+         Subtype = ""
+      };
+      var results = sender.Send(GetToken(), "POST", model, Config.JiraBaseURL, $"/wiki/api/v2/pages");     
+      if(results.Content.ReadAsStringAsync().Result.Contains("A page with this title already exists"))
+      {
+         //TODO: handle comparing the contents to ensure they are up to date.
+         return;
+      }
+      if(results.IsSuccessStatusCode)
+      {
+         Console.WriteLine($"Created page: {title}");      
+      } else
+      {
+         Console.WriteLine($"ERROR CREATING PAGE: {results.ReasonPhrase}");
+         Console.WriteLine($"{results.Content.ReadAsStringAsync().Result}");
+      }
    }
-   public void GetSpaces()
-    {
-      HttpSender sender = new();
-      var results = sender.Send(GetToken(), "GET", "", GetBaseUrl(), "/wiki/api/v2/spaces");
-      var content = results.Content.ReadAsStringAsync().Result;
-      Console.WriteLine(content);
-
-    }
-   
 }
