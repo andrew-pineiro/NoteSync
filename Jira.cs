@@ -4,7 +4,7 @@ using System.Text;
 namespace NoteSync;
 public class Jira
 {
-   public string GetToken()
+   private static string GetToken()
    {
       var secret = Config.JiraEmail + ":" + Config.JiraSecret;
       var bytes = Encoding.UTF8.GetBytes(secret);
@@ -21,6 +21,7 @@ public class Jira
          ParentId = parentId,
          Body = new JiraBody()
          {
+            //Default value for storing HTML in pages
             Representation = "storage",
             Value = Converter.ConvertMdToHtml(content)
          },

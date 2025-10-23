@@ -5,6 +5,9 @@ namespace NoteSync;
 
 public class Config
 {
+    /*
+    Public config properties used throughout the lifetime of the application
+    */
     public static string JiraSecret { get; private set; } = string.Empty;
     public static string JiraEmail { get; private set; } = string.Empty;
     public static string JiraBaseURL { get; private set; } = string.Empty;
@@ -13,7 +16,9 @@ public class Config
     public static string NoteDirectory { get; private set; } = string.Empty;
     public static string NoteExtension { get; private set; } = string.Empty;
 
-
+    /*
+    Private config properties only used in this instance of Config to read from the appsettings.json file
+    */
     [JsonPropertyName("JiraSecret")]
     public required string _jiraSecret { private get; set; }
     [JsonPropertyName("JiraEmail")]
@@ -51,7 +56,9 @@ public class Config
             
         } catch (Exception e)
         {
+            //If the config cannot be set, exit the application and show the error message.
             Console.WriteLine($"ERROR: unable to set config - {e.Message}");
+            Environment.Exit(-1);
         }
 
     }
