@@ -21,8 +21,8 @@ public class Jira
          ParentId = parentId,
          Body = new JiraBody()
          {
-            Representation = "wiki",
-            Value = content
+            Representation = "storage",
+            Value = Converter.ConvertMdToHtml(content)
          },
          Subtype = ""
       };

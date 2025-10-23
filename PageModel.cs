@@ -13,15 +13,7 @@ public class PageModel
     public string? OwnerId { get; set; }
     public string? LastOwnerId { get; set; }
     public string? CreatedAt { get; set; }
-    // public VersionInfo Version { get; set; }
     public Body? Body { get; set; }
-    // public LabelCollection Labels { get; set; }
-    // public PropertyCollection Properties { get; set; }
-    // public OperationCollection Operations { get; set; }
-    // public LikeCollection Likes { get; set; }
-    // public VersionCollection Versions { get; set; }
-    // public bool IsFavoritedByCurrentUser { get; set; }
-    // public Link Links { get; set; }
 }
 public class Body
 {
