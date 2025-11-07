@@ -41,6 +41,7 @@ public class Config
         if (!Path.Exists(appSettings))
         {
             Console.WriteLine("ERROR: appsettings.json file doesn't exist");
+            Environment.Exit(-1);
         }
         var content = File.ReadAllText(appSettings);
         try
