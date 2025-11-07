@@ -10,6 +10,20 @@ public class Jira
       var bytes = Encoding.UTF8.GetBytes(secret);
       return Convert.ToBase64String(bytes);
    }
+   private JiraReturnModel? GetPageByTitle(string title)
+   {
+      HttpSender sender = new();
+      var results = sender.Send(GetToken(), "GET", "", Config.JiraBaseURL, $"/wiki/api/v2/pages?title={title}");
+      var model = results.Content.ReadFromJsonAsync<JiraReturnModel>().Result;
+      if (model != null)
+      {
+         if (model.results!.Count > 0)
+         {
+            return model;
+         }
+      }
+      return null;
+   }
    public void CreatePage(string parentId, string title, string content, out string createdId)
    {
       createdId = string.Empty;
@@ -25,12 +39,28 @@ public class Jira
             Representation = "storage",
             Value = Converter.ConvertMdToHtml(content)
          },
-         Subtype = ""
+         Subtype = "",
+         Version = new()
       };
-      var results = sender.Send(GetToken(), "POST", model, Config.JiraBaseURL, $"/wiki/api/v2/pages");     
+      var results = sender.Send(GetToken(), "POST", model, Config.JiraBaseURL, $"/wiki/api/v2/pages");  
       if(results.Content.ReadAsStringAsync().Result.Contains("A page with this title already exists"))
       {
-         //TODO: handle comparing the contents to ensure they are up to date.
+         var page = GetPageByTitle(title);
+         if(page != null && !string.IsNullOrEmpty(page.results![0].id))
+         {
+            model.PageId = page.results[0].id;
+            model.Version.number = Convert.ToInt32(page.results[0].version!.number) + 1;
+            model.Version.message = "NoteSync Update";
+            var subResults = sender.Send(GetToken(), "PUT", model, Config.JiraBaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
+            if(subResults.IsSuccessStatusCode)
+            {
+               Console.WriteLine($"Updated page {model.PageId} - {title}");
+            } else
+            {
+               Console.WriteLine($"ERROR UPDATING PAGE: {subResults.ReasonPhrase}");
+               Console.WriteLine(subResults.Content.ReadAsStringAsync().Result);
+            }
+         }
          return;
       }
       if(results.IsSuccessStatusCode)
