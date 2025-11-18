@@ -46,9 +46,13 @@ public class Jira
       if(results.Content.ReadAsStringAsync().Result.Contains("A page with this title already exists"))
       {
          var page = GetPageByTitle(title);
-         if(page != null && !string.IsNullOrEmpty(page.results![0].id))
+         if(page == null || page.results!.Count <= 1 || page.results[0].body!.Value == model.Body.Value) 
+            return;
+          
+         if(!string.IsNullOrEmpty(page.results![0].id))
          {
             model.PageId = page.results[0].id;
+            model.ParentId = page.results[0].parentId;
             model.Version.number = Convert.ToInt32(page.results[0].version!.number) + 1;
             model.Version.message = "NoteSync Update";
             var subResults = sender.Send(GetToken(), "PUT", model, Config.JiraBaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
