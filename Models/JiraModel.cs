@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace NoteSync;
+namespace NoteSync.Models;
 
 public class JiraModel
 {

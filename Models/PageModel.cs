@@ -1,4 +1,4 @@
-namespace NoteSync;
+namespace NoteSync.Models;
 
 public class PageModel
 {

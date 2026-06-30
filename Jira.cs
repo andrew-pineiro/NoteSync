@@ -1,5 +1,8 @@
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using NoteSync.Models;
 
 namespace NoteSync;
 public class Jira
@@ -77,5 +80,15 @@ public class Jira
          Console.WriteLine($"ERROR CREATING PAGE: {results.ReasonPhrase}");
          Console.WriteLine($"{results.Content.ReadAsStringAsync().Result}");
       }
+   }
+   public string? GetSpaceId(string spaceKey) {
+      HttpSender http = new();
+      var response = http.Send(GetToken(), "GET", "", Config.JiraBaseURL, $"/wiki/api/v2/spaces?keys={spaceKey}");
+
+      response.EnsureSuccessStatusCode();
+      var model = response.Content.ReadFromJsonAsync<JiraReturnModel>().Result ??
+                     throw new Exception("Unexpected error during API call");
+
+      return model.results!.First().id;
    }
 }
