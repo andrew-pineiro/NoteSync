@@ -9,14 +9,14 @@ public class Jira
 {
    private static string GetToken()
    {
-      var secret = Config.JiraEmail + ":" + Config.JiraSecret;
+      var secret = Config.Jira.Email + ":" + Config.Jira.Secret;
       var bytes = Encoding.UTF8.GetBytes(secret);
       return Convert.ToBase64String(bytes);
    }
-   private JiraReturnModel? GetPageByTitle(string title)
+   private static JiraReturnModel? GetPageByTitle(string title)
    {
       HttpSender sender = new();
-      var results = sender.Send(GetToken(), "GET", "", Config.JiraBaseURL, $"/wiki/api/v2/pages?title={title}");
+      var results = sender.Send(GetToken(), "GET", "", Config.Jira.BaseURL, $"/wiki/api/v2/pages?title={title}");
       var model = results.Content.ReadFromJsonAsync<JiraReturnModel>().Result;
       if (model != null)
       {
@@ -33,7 +33,7 @@ public class Jira
       HttpSender sender = new();
       JiraModel model = new()
       {
-         SpaceId = Config.JiraSpaceID,
+         SpaceId = Config.Jira.SpaceID,
          Title = title,
          ParentId = parentId,
          Body = new JiraBody()
@@ -45,7 +45,7 @@ public class Jira
          Subtype = "",
          Version = new()
       };
-      var results = sender.Send(GetToken(), "POST", model, Config.JiraBaseURL, $"/wiki/api/v2/pages");  
+      var results = sender.Send(GetToken(), "POST", model, Config.Jira.BaseURL, $"/wiki/api/v2/pages");  
       if(results.Content.ReadAsStringAsync().Result.Contains("A page with this title already exists"))
       {
          var page = GetPageByTitle(title);
@@ -58,7 +58,7 @@ public class Jira
             model.ParentId = page.results[0].parentId;
             model.Version.number = Convert.ToInt32(page.results[0].version!.number) + 1;
             model.Version.message = "NoteSync Update";
-            var subResults = sender.Send(GetToken(), "PUT", model, Config.JiraBaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
+            var subResults = sender.Send(GetToken(), "PUT", model, Config.Jira.BaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
             if(subResults.IsSuccessStatusCode)
             {
                Console.WriteLine($"Updated page {model.PageId} - {title}");
@@ -81,9 +81,9 @@ public class Jira
          Console.WriteLine($"{results.Content.ReadAsStringAsync().Result}");
       }
    }
-   public string? GetSpaceId(string spaceKey) {
+   public static string? GetSpaceId(string spaceKey) {
       HttpSender http = new();
-      var response = http.Send(GetToken(), "GET", "", Config.JiraBaseURL, $"/wiki/api/v2/spaces?keys={spaceKey}");
+      var response = http.Send(GetToken(), "GET", "", Config.Jira.BaseURL, $"/wiki/api/v2/spaces?keys={spaceKey}");
 
       response.EnsureSuccessStatusCode();
       var model = response.Content.ReadFromJsonAsync<JiraReturnModel>().Result ??

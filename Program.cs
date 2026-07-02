@@ -12,32 +12,48 @@ public class Program {
         
         switch(cmd) {
             case "sync":
+                var sftpEnabled = false;
+                if (Config.NoteDirectory.StartsWith("sftp://")) {
+                    if (Config.Sftp == null) {
+                        Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
+                        return;
+                    }
+                    Sftp.DownloadFiles(Config.NoteDirectory);
+                    sftpEnabled = true;
+
+                } else
                 if (!Directory.Exists(Config.NoteDirectory))
                 {
                     Console.WriteLine($"ERROR: Directory does not exist - {Config.NoteDirectory}");
                     return;
                 }
-                var files = Directory.GetFiles(Config.NoteDirectory, $"*{Config.NoteExtension}", SearchOption.AllDirectories);
-                string parentId = Config.JiraRootPageID;
+                var dir = sftpEnabled ? "./notes/" : Config.NoteDirectory;
+                var files = Directory.GetFiles(
+                                dir, 
+                                $"*{Config.NoteExtension}", 
+                                SearchOption.AllDirectories);
+
+                string parentId = Config.Jira.RootPageID;
                 foreach (var file in files)
                 {
                     string dirChar = Path.DirectorySeparatorChar.ToString();
-                    string fileName = file.Substring(file.LastIndexOf(dirChar) + 1);
-                    string category = file.Replace(Config.NoteDirectory, "").Replace(fileName, "").Replace(dirChar, "");
-                    string subject = fileName.Replace(Config.NoteExtension, "");
+                    string fileName = file[(file.LastIndexOf(dirChar) + 1)..];
+                    string category = file.Replace(dir, "").Replace(fileName, "").Replace(dirChar, "");
+                    string subject = fileName.Replace(dir, "");
                     string content = File.ReadAllText(file);
 
                     if(!string.IsNullOrEmpty(category))
                     {
-                        jira.CreatePage(Config.JiraRootPageID, category, "", out string id);
+                        jira.CreatePage(Config.Jira.RootPageID, category, "", out string id);
                         if (!string.IsNullOrEmpty(id))
                             parentId = id;
                         jira.CreatePage(parentId, subject, content, out _);
                         
                     } else
                     {
-                        jira.CreatePage(Config.JiraRootPageID, subject, content, out _);
+                        jira.CreatePage(Config.Jira.RootPageID, subject, content, out _);
                     }
+                    //TODO: delete file afterwards, if using sftp.
                 }
                 break;
             case "spaceid":
@@ -45,7 +61,7 @@ public class Program {
                     Console.WriteLine("ERROR: not enough arguments");
                     return;
                 }
-                Console.WriteLine($"Space ID: {jira.GetSpaceId(args[1])}");
+                Console.WriteLine($"Space ID: {Jira.GetSpaceId(args[1])}");
                 break;
             default:
                 Console.WriteLine($"COMMAND NOT IMPLEMENTED {cmd}");

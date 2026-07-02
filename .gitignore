@@ -57,3 +57,4 @@ nunit-*.xml
 results.*
 appsettings.json
 .vscode/
+notes/
