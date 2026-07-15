@@ -18,6 +18,7 @@ public class Program {
                         Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
                         return;
                     }
+                    //TODO: look into why remote deletion is not working
                     Sftp.DownloadFiles(Config.NoteDirectory, false);
                     sftpEnabled = true;
 
