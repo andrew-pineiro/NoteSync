@@ -27,7 +27,7 @@ public class Jira
       }
       return null;
    }
-   public void CreatePage(string parentId, string title, string content, out string createdId)
+   public void CreatePage(string parentId, string title, string content, out string createdId, bool category = false)
    {
       createdId = string.Empty;
       HttpSender sender = new();
@@ -49,32 +49,41 @@ public class Jira
       if(results.Content.ReadAsStringAsync().Result.Contains("A page with this title already exists"))
       {
          var page = GetPageByTitle(title);
-         if(page == null || page.results!.Count <= 1 || page.results[0].body!.Value == model.Body.Value) 
-            return;
-          
-         if(!string.IsNullOrEmpty(page.results![0].id))
-         {
-            model.PageId = page.results[0].id;
-            model.ParentId = page.results[0].parentId;
-            model.Version.number = Convert.ToInt32(page.results[0].version!.number) + 1;
-            model.Version.message = "NoteSync Update";
-            var subResults = sender.Send(GetToken(), "PUT", model, Config.Jira.BaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
-            if(subResults.IsSuccessStatusCode)
+         if(!category) {
+            //TODO: look into why its updating always instead of only when there is changes
+            if(page == null || page.results!.Count < 1 || page.results[0].body!.Value == model.Body.Value) 
+               return;
+            
+            if(!string.IsNullOrEmpty(page.results![0].id))
             {
-               Console.WriteLine($"Updated page {model.PageId} - {title}");
-            } else
-            {
-               Console.WriteLine($"ERROR UPDATING PAGE: {subResults.ReasonPhrase}");
-               Console.WriteLine(subResults.Content.ReadAsStringAsync().Result);
+               model.PageId = page.results[0].id;
+               model.ParentId = page.results[0].parentId;
+               model.Version.number = Convert.ToInt32(page.results[0].version!.number) + 1;
+               model.Version.message = "NoteSync Update";
+               var subResults = sender.Send(GetToken(), "PUT", model, Config.Jira.BaseURL, $"/wiki/api/v2/pages/{model.PageId}"); 
+               if(subResults.IsSuccessStatusCode)
+               {
+                  Console.WriteLine($"Updated page {title} - {model.PageId}");
+               } else
+               {
+                  Console.WriteLine($"ERROR UPDATING PAGE: {subResults.ReasonPhrase}");
+                  Console.WriteLine(subResults.Content.ReadAsStringAsync().Result);
+               }
             }
+            return;
+         } else {
+            if(page!.results!.Count > 0) {
+               createdId = page.results.First().id ?? "";
+            }
+            return;
          }
-         return;
+         
       }
       if(results.IsSuccessStatusCode)
       {
          var resultModel = results.Content.ReadFromJsonAsync<PageModel>().Result;
          createdId = resultModel!.Id!;
-         Console.WriteLine($"Created page: {title} - {createdId}");      
+         Console.WriteLine($"Created {(category ? "category" : "page")}: {title} - {createdId}");      
       } else
       {
          Console.WriteLine($"ERROR CREATING PAGE: {results.ReasonPhrase}");

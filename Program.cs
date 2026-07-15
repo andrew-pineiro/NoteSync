@@ -18,7 +18,7 @@ public class Program {
                         Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
                         return;
                     }
-                    Sftp.DownloadFiles(Config.NoteDirectory);
+                    Sftp.DownloadFiles(Config.NoteDirectory, false);
                     sftpEnabled = true;
 
                 } else
@@ -39,12 +39,12 @@ public class Program {
                     string dirChar = Path.DirectorySeparatorChar.ToString();
                     string fileName = file[(file.LastIndexOf(dirChar) + 1)..];
                     string category = file.Replace(dir, "").Replace(fileName, "").Replace(dirChar, "");
-                    string subject = fileName.Replace(dir, "");
+                    string subject = fileName.Replace(Config.NoteExtension, "");
                     string content = File.ReadAllText(file);
 
                     if(!string.IsNullOrEmpty(category))
                     {
-                        jira.CreatePage(Config.Jira.RootPageID, category, "", out string id);
+                        jira.CreatePage(Config.Jira.RootPageID, category, "", out string id, true);
                         if (!string.IsNullOrEmpty(id))
                             parentId = id;
                         jira.CreatePage(parentId, subject, content, out _);
@@ -53,7 +53,9 @@ public class Program {
                     {
                         jira.CreatePage(Config.Jira.RootPageID, subject, content, out _);
                     }
-                    //TODO: delete file afterwards, if using sftp.
+                    if(sftpEnabled) {
+                        File.Delete(file);
+                    }
                 }
                 break;
             case "spaceid":
