@@ -53,9 +53,9 @@ public class Program {
                     {
                         jira.CreatePage(Config.Jira.RootPageID, subject, content, out _);
                     }
-                    if(sftpEnabled) {
-                        File.Delete(file);
-                    }
+                }
+                if(sftpEnabled) {
+                    Directory.Delete(dir, true);
                 }
                 break;
             case "spaceid":
