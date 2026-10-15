@@ -3,16 +3,16 @@
 public class Program {
     private static void Main(string[] args)
     {
-        string cmd = "sync";
-        if(args.Length > 0) {
-            cmd = args[0];
-        }
+        string cmd = args.Length > 0 ? args[0] : "sync";
+       
         Config.SetConfig();
-        Jira jira = new();
         
+        Jira jira = new();
+        string[] files;
+
         switch(cmd) {
             case "sync":
-                (var files, var dir, var sftpEnabled) = GetFiles(true);
+                (files, var dir, var sftpEnabled) = GetFiles(true);
                 string parentId = Config.Jira.RootPageID;
                 foreach (var file in files)
                 {
@@ -39,8 +39,8 @@ public class Program {
                 }
                 break;
             case "list":
-                (var files2, var _, var _) = GetFiles(false);
-                foreach(var f in files2) {
+                (files, var _, var _) = GetFiles(false);
+                foreach(var f in files) {
                     Console.WriteLine(f);
                 }
                 break;
@@ -63,7 +63,6 @@ public class Program {
                 Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
                 return ([], "", false);
             }
-            //TODO: look into why remote deletion is not working
             Sftp.DownloadFiles(Config.NoteDirectory, delete);
             sftpEnabled = true;
 
