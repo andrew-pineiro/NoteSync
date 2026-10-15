@@ -56,10 +56,10 @@ public class Sftp {
                 }
                 using (var stream = File.Create(Path.Join(rootDir, file.Name)))
                 {
-                    sftp.DownloadFile(file.FullName, stream);
+                    sftp.DownloadFileAsync(file.FullName, stream);
                 }
                 if (delete)
-                    sftp.DeleteFile(file.FullName);
+                    sftp.DeleteFileAsync(file.FullName, new CancellationToken());
             }
         }
         catch (DirectoryNotFoundException) {

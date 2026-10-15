@@ -12,28 +12,7 @@ public class Program {
         
         switch(cmd) {
             case "sync":
-                var sftpEnabled = false;
-                if (Config.NoteDirectory.StartsWith("sftp://")) {
-                    if (Config.Sftp == null) {
-                        Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
-                        return;
-                    }
-                    //TODO: look into why remote deletion is not working
-                    Sftp.DownloadFiles(Config.NoteDirectory, false);
-                    sftpEnabled = true;
-
-                } else
-                if (!Directory.Exists(Config.NoteDirectory))
-                {
-                    Console.WriteLine($"ERROR: Directory does not exist - {Config.NoteDirectory}");
-                    return;
-                }
-                var dir = sftpEnabled ? "./notes/" : Config.NoteDirectory;
-                var files = Directory.GetFiles(
-                                dir, 
-                                $"*{Config.NoteExtension}", 
-                                SearchOption.AllDirectories);
-
+                (var files, var dir, var sftpEnabled) = GetFiles(true);
                 string parentId = Config.Jira.RootPageID;
                 foreach (var file in files)
                 {
@@ -59,6 +38,12 @@ public class Program {
                     Directory.Delete(dir, true);
                 }
                 break;
+            case "list":
+                (var files2, var _, var _) = GetFiles(false);
+                foreach(var f in files2) {
+                    Console.WriteLine(f);
+                }
+                break;
             case "spaceid":
                 if(args.Length < 2) {
                     Console.WriteLine("ERROR: not enough arguments");
@@ -70,10 +55,32 @@ public class Program {
                 Console.WriteLine($"COMMAND NOT IMPLEMENTED {cmd}");
                 break;
         }
-
-        
-        
     }    
+    private static (string[], string, bool) GetFiles(bool delete) {
+        var sftpEnabled = false;
+        if (Config.NoteDirectory.StartsWith("sftp://")) {
+            if (Config.Sftp == null) {
+                Console.WriteLine("ERROR: Sftp directory specified without Sftp appsettings.");
+                return ([], "", false);
+            }
+            //TODO: look into why remote deletion is not working
+            Sftp.DownloadFiles(Config.NoteDirectory, delete);
+            sftpEnabled = true;
+
+        } else
+        if (!Directory.Exists(Config.NoteDirectory))
+        {
+            Console.WriteLine($"ERROR: Directory does not exist - {Config.NoteDirectory}");
+            return ([], "", false);
+        }
+        var dir = sftpEnabled ? "./notes/" : Config.NoteDirectory;
+        var files = Directory.GetFiles(
+                        dir, 
+                        $"*{Config.NoteExtension}", 
+                        SearchOption.AllDirectories);
+
+        return (files, dir, sftpEnabled);
+    }
 }
     
     
